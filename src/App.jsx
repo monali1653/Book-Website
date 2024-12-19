@@ -244,12 +244,31 @@ const App = () => {
 </div>
 
 
-      <div id="exchange" className="p-8 bg-orange-50">
-        <h2 className="text-3xl font-bold mb-6 text-center">Exchange</h2>
-        <div className="text-center text-lg">
-          Find great books available for exchange at amazing prices!
+<div id="exchange" className="p-8 bg-orange-50 flex flex-col items-center">
+        {/* <!-- Title in the Middle --> */}
+        {/* <h2 className="text-3xl font-bold mb-6 text-center">Exchange</h2> */}
+
+        {/* <!-- Content Inside White Box --> */}
+        <div className="bg-white bg-opacity-90 p-8 rounded-3xl shadow-lg w-full">
+            <div className="w-full flex justify-between items-center">
+            <div className="w-1/2 pr-6">
+                    <h3 className="text-5xl font-bold mb-4">Exchange your books with used titles</h3>
+                    <p className="text-3xl font-semibold mb-2">Give your books countless lives !!</p>
+                        <p className="text-xl italic">Exchange any book with any book here and pay only for shipping.</p>
+                    {/* <div className="bg-gray-400 bg-opacity-50 p-6 rounded-lg shadow-md max-w-sm">
+                        <p className="text-xl font-semibold mb-2">Give your books countless lives</p>
+                        <p className="text-sm italic">Exchange any book with any book here and pay only for shipping</p>
+                    </div> */}
+                </div>
+
+                {/* <!-- Right Part --> */}
+                <div className="w-1/2 flex justify-center items-center">
+                    <img src="/images/exch1.png" alt="Books Exchange" className="object-cover" />
+                </div>
+            </div>
         </div>
-      </div>
+    </div>
+
 
       <div id="signup" className="p-8 bg-orange-50">
         <h2 className="text-3xl font-bold mb-6 text-center">Sign Up / Login</h2>
