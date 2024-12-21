@@ -269,6 +269,34 @@ const App = () => {
         </div>
     </div>
 
+    <div id="discount" className="bg-orange-50 flex justify-center items-center p-5 shadow-lg">
+  <div className="bg-orange-400 rounded-3xl p-6 shadow-md flex flex-wrap w-full items-center space-x-8 md:space-x-56"> {/* Adjust space between elements */}
+    <img
+      src="/images/disc.png"
+      alt="Book"
+      className="rounded-lg w-full md:w-1/3 mb-4 md:mb-0"
+    />
+    <div className="flex-1 text-white">
+      <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-5"> {/* Adjust font size for responsiveness */}
+        Register now and get 30% off on your first purchase!
+      </h2>
+
+      <div className="flex flex-col sm:flex-row items-center bg-gray-100 rounded-full px-2 py-1 w-full max-w-[400px] mb-6">
+        <i className="text-gray-600 mr-3"></i> {/* Font Awesome Search Icon */}
+        <input
+          type="text"
+          placeholder="Enter Your Email Address"
+          className="flex-grow bg-transparent border-none outline-none text-gray-700 placeholder-gray-500"
+        />
+        <button className="bg-orange-400 text-white font-semibold px-6 py-2 rounded-full hover:bg-orange-500 transition mt-2 sm:mt-0 sm:ml-4">
+          Register
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
       <div id="signup" className="p-8 bg-orange-50">
         <h2 className="text-3xl font-bold mb-6 text-center">Sign Up / Login</h2>
