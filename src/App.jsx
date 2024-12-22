@@ -14,22 +14,22 @@ const App = () => {
     {
       id: 1,
       name: "Young and Teen",
-      image: "/images/yt.png",
+      image: "./images/yt.png",
     },
     {
       id: 2,
       name: "Fiction",
-      image: "/images/fiction.png",
+      image: "./images/fiction.png",
     },
     {
       id: 3,
       name: "Romantic",
-      image: "/images/romm.png",
+      image: "./images/romm.png",
     },
     {
       id: 4,
       name: "Cooking",
-      image: "/images/cook.png",
+      image: "./images/cook.png",
     },
   ];
 
@@ -47,7 +47,7 @@ const App = () => {
           >
             &#9776;
           </button>
-          <img src="/images/bookcart.png" alt="Logo" className="h-10" />
+          <img src="./images/bookcart.png" alt="Logo" className="h-10" />
           <h1 className="ml-3 text-xl font-bold">BOOK CART</h1>
         </div>
         <div
@@ -250,7 +250,7 @@ const App = () => {
     {/* Right Section */}
     <div className="md:w-1/2 flex justify-center">
       <img
-        src="/images/bookpage.png" /* Replace with your desired image URL */
+        src="./images/bookpage.png" /* Replace with your desired image URL */
         alt="Books"
         className="max-w-full h-auto rounded-lg shadow-lg"
       />
@@ -280,35 +280,35 @@ const App = () => {
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-0 relative">
       {[
         {
-          image: "/images/book1.jpg",
+          image: "./images/book1.jpg",
           title: "IT STARTS WITH US",
           author: "Colleen Hoover",
           price: "849",
           stock: "4 stocks left",
         },
         {
-          image: "/images/book2.jpg",
+          image: "./images/book2.jpg",
           title: "FOURTH WING",
           author: "Rebecca Yarros",
           price: "989",
           stock: "3 stocks left",
         },
         {
-          image: "/images/boook3.jpg",
+          image: "./images/boook3.jpg",
           title: "Ruthless Vows",
           author: "Rebecca Ross",
           price: "999",
           stock: "5 stocks left",
         },
         {
-          image: "/images/boook4.jpg",
+          image: "./images/boook4.jpg",
           title: "IRON FLAME",
           author: "Rebecca Yarros",
           price: "764",
           stock: "2 stocks left",
         },
         {
-          image: "/images/book5.jpg",
+          image: "./images/book5.jpg",
           title: "THE ONLY ONE LEFT",
           author: "Riley Sager",
           price: "543",
@@ -403,7 +403,7 @@ const App = () => {
 
                 {/* <!-- Right Part --> */}
                 <div className="w-1/2 flex justify-center items-center">
-                    <img src="/images/exch1.png" alt="Books Exchange" className="object-cover" />
+                    <img src="./images/exch1.png" alt="Books Exchange" className="object-cover" />
                 </div>
             </div>
         </div>
@@ -412,7 +412,7 @@ const App = () => {
     <div id="discount" className="bg-orange-50 flex justify-center items-center p-5 shadow-lg">
   <div className="bg-orange-400 rounded-3xl p-6 shadow-md flex flex-wrap w-full items-center space-x-8 md:space-x-56"> {/* Adjust space between elements */}
     <img
-      src="/images/disc.png"
+      src="./images/disc.png"
       alt="Book"
       className="rounded-lg w-full md:w-1/3 mb-4 md:mb-0"
     />
@@ -441,7 +441,7 @@ const App = () => {
       <div className="container mx-auto flex flex-wrap justify-between items-start space-y-6 md:space-y-0">
         {/* Logo and Book Cart */}
         <div className="flex flex-col items-center space-y-2 mb-6">
-  <img src="/images/bookcart.png" alt="Logo" className="w-16 h-16" />
+  <img src="./images/bookcart.png" alt="Logo" className="w-16 h-16" />
   <span className="font-bold text-4xl">Book Cart</span>
 </div>
 
