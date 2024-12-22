@@ -1,20 +1,15 @@
 // Import necessary libraries
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 
 const App = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Change this to simulate login state
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-
-  const [bestSellersIndex, setBestSellersIndex] = useState(0);
-  const [dealsIndex, setDealsIndex] = useState(0);
+  const isLoggedIn = false;
 
   
-
- 
- 
-
   const categories = [
     {
       id: 1,
@@ -38,7 +33,10 @@ const App = () => {
     },
   ];
 
+
+
   return (
+    
     <div className="font-sans">
       {/* Navbar */}
       <nav className="bg-orange-50 text-black p-4 flex justify-between items-center">
@@ -53,29 +51,171 @@ const App = () => {
           <h1 className="ml-3 text-xl font-bold">BOOK CART</h1>
         </div>
         <div
-          className={`md:flex gap-6 items-center ${isMobileMenuOpen ? "flex flex-col bg-lime-800 w-full absolute top-14 left-0" : "hidden"}`}
+          className={`md:flex gap-6 items-center ${
+            isMobileMenuOpen
+              ? "flex flex-col bg-orange-50 w-full absolute top-14 left-0"
+              : "hidden"
+          }`}
         >
-          <a href="#home" className="block px-4 py-2 font-semibold hover:bg-slate-200 hover:text-orange-500">HOME</a>
+          <a
+            href="#home"
+            className="block px-4 py-2 font-semibold  hover:text-orange-500"
+          >
+            HOME
+          </a>
           <div className="relative group">
-            <span className="block px-4 py-2 cursor-pointer font-semibold hover:bg-slate-200 text-orange-500">CATEGORIES &#9662;</span>
+            <span className="block px-4 py-2 cursor-pointer font-semibold  text-orange-500">
+              CATEGORIES &#9662;
+            </span>
             <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 shadow-lg">
-              <a href="#romance" className="block px-4 py-2 hover:bg-gray-200">Romance Novels</a>
-              <a href="#fiction" className="block px-4 py-2 hover:bg-gray-200">Fiction</a>
-              <a href="#nonfiction" className="block px-4 py-2 hover:bg-gray-200">Non-Fiction</a>
-              <a href="#thriller" className="block px-4 py-2 hover:bg-gray-200">Thriller</a>
+              <a
+                href="#youngandteen"
+                className="block px-4 py-2 hover:bg-gray-200"
+              >
+                Young and Teen
+              </a>
+              <a
+                href="#fiction"
+                className="block px-4 py-2 hover:bg-gray-200"
+              >
+                Fiction
+              </a>
+              <a
+                href="#romantic"
+                className="block px-4 py-2 hover:bg-gray-200"
+              >
+                Romantic
+              </a>
+              <a
+                href="#cooking"
+                className="block px-4 py-2 hover:bg-gray-200"
+              >
+                Cooking
+              </a>
             </div>
           </div>
-          <a href="#best-sales" className="block px-4 py-2 font-semibold hover:bg-slate-200  hover:text-orange-500">BEST SALES</a>
-          <a href="#exchange" className="block px-4 py-2 font-semibold hover:bg-slate-200 hover:text-orange-500">EXCHANGE</a>
+          <a
+            href="#best-sales"
+            className="block px-4 py-2 font-semibold   hover:text-orange-500"
+          >
+            BEST SALES
+          </a>
+          <a
+            href="#exchange"
+            className="block px-4 py-2 font-semibold  hover:text-orange-500"
+          >
+            EXCHANGE
+          </a>
         </div>
-        <div className="flex items-center">
-          {isLoggedIn ? (
-            <img src="/profile.png" alt="Profile" className="h-10 w-10 rounded-full" />
-          ) : (
-            <a href="#signup" className="text-sm font-bold hover:underline text-orange-500">Sign Up</a>
-          )}
+        <div className="flex items-center space-x-4">
+  {isLoggedIn ? (
+    // Logged-in state: Show only the avatar
+    <img
+      src="/profile.png"
+      alt="Profile"
+      className="h-10 w-10 rounded-full border-2 border-orange-500"
+    />
+  ) : (
+    // Logged-out state: Show Log In button and user icon from cdnjs
+    <div className="flex items-center space-x-2 border-2 border-orange-500 rounded-full px-3 py-1">
+  <button
+    className="text-sm font-bold hover:underline text-orange-500"
+    onClick={() => setIsModalOpen(true)}
+  >
+    Log In
+  </button>
+  <i className="fas fa-user text-orange-500 text-lg"></i>
+</div>
+
+  )}
+</div>
+</nav>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-8 w-96 relative shadow-lg">
+            {/* Close Button */}
+            <button
+              className="absolute top-2 right-2 text-gray-600 hover:text-black"
+              onClick={() => setIsModalOpen(false)}
+            >
+              &times;
+            </button>
+            <h2 className="text-3xl font-bold mb-6 text-center">
+              Sign Up / Login
+            </h2>
+            {!showRegister ? (
+              <div className="space-y-4">
+                <form className="space-y-4">
+                  <h3 className="text-xl font-bold">Login</h3>
+                  <input
+                    type="text"
+                    placeholder="Enter your username"
+                    className="w-full p-2 border rounded"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Enter your password"
+                    className="w-full p-2 border rounded"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full bg-green-500 text-white p-2 rounded"
+                  >
+                    Login
+                  </button>
+                </form>
+                <div className="flex flex-col items-center justify-center">
+                  <p className="mb-4">Don't have an account?</p>
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    onClick={() => setShowRegister(true)}
+                  >
+                    Register Here
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form className="space-y-4">
+                <h3 className="text-xl font-bold">Register</h3>
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  className="w-full p-2 border rounded"
+                />
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full p-2 border rounded"
+                />
+                <input
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  className="w-full p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Enter a username"
+                  className="w-full p-2 border rounded"
+                />
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  className="w-full p-2 border rounded"
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-blue-500 text-white p-2 rounded"
+                >
+                  Register
+                </button>
+              </form>
+            )}
+          </div>
         </div>
-      </nav>
+      )}
+
 
       {/* Main Content */}
      <div
@@ -297,8 +437,73 @@ const App = () => {
 </div>
 
 
+<footer className="bg-orange-50 p-6 text-gray-800">
+      <div className="container mx-auto flex flex-wrap justify-between items-start space-y-6 md:space-y-0">
+        {/* Logo and Book Cart */}
+        <div className="flex flex-col items-center space-y-2 mb-6">
+  <img src="/images/bookcart.png" alt="Logo" className="w-16 h-16" />
+  <span className="font-bold text-4xl">Book Cart</span>
+</div>
 
-      <div id="signup" className="p-8 bg-orange-50">
+
+
+        {/* Quick Links */}
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg">Quick Links</h3>
+          <ul className="space-y-1">
+            <li>
+              <a href="#" className="hover:text-orange-500">Home</a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-orange-500">Categories</a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-orange-500">Best Sales</a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-orange-500">Exchange</a>
+            </li>
+          </ul>
+        </div>
+
+        {/* Customer Area */}
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg">Customer Area</h3>
+          <ul className="space-y-1">
+            <li>
+              <a href="#" className="hover:text-orange-500">My Account</a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-orange-500">Orders</a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-orange-500">Tracking List</a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-orange-500">Terms</a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-orange-500">Privacy Policy</a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-orange-500">FAQ</a>
+            </li>
+          </ul>
+        </div>
+
+        {/* Register Section */}
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg">Don't Miss the Newest Books</h3>
+          <p>Register now for the newest book updates!</p>
+          <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+            Register Now
+          </button>
+        </div>
+      </div>
+    </footer>
+
+
+      {/* <div id="signup" className="p-8 bg-orange-50">
         <h2 className="text-3xl font-bold mb-6 text-center">Sign Up / Login</h2>
         {!showRegister ? (
           <div className="grid md:grid-cols-2 gap-8">
@@ -329,8 +534,10 @@ const App = () => {
             <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Register</button>
           </form>
         )}
-      </div>
+      </div> */}
     </div>
+
+    
   );
 };
 
