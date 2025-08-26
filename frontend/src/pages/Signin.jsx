@@ -1,41 +1,39 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import api from '../api/axiosInstance.js';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import api from "../api/axiosInstance.js";
 
 const Signin = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // 👈 For toggling password visibility
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     const payload = formData;
-
     try {
-
-      const response = await api.post(`/api/v1/users/login`,payload, {withCredentials: true});
-      setMessage(response.data.message);
-      setError('');
+      const res = await api.post("/api/v1/users/login", payload);
+      setMessage(res.data.message);
+      setError("");
       setIsAuthenticated(true);
       navigate("/");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Something went wrong";
       setError(errorMessage);
-      setMessage('');
+      setMessage("");
     }
   };
 
@@ -51,10 +49,15 @@ const Signin = ({ setIsAuthenticated }) => {
 
       <div className="md:w-1/2 w-full bg-white flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <h2 className="font-gothic text-2xl font-bold text-gray-800 mb-4">LogIn Here</h2>
+          <h2 className="font-gothic text-2xl font-bold text-gray-800 mb-4">
+            LogIn Here
+          </h2>
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
-              <label className="font-parastoo block text-gray-700 mb-1 text-lg" htmlFor="email">
+              <label
+                className="font-parastoo block text-gray-700 mb-1 text-lg"
+                htmlFor="email"
+              >
                 Email
               </label>
               <input
@@ -69,15 +72,17 @@ const Signin = ({ setIsAuthenticated }) => {
               />
             </div>
 
-            {/* 👇 Password field with eye icon */}
             <div className="relative">
-              <label className="font-parastoo block text-gray-700 mb-1 text-lg" htmlFor="password">
+              <label
+                className="font-parastoo block text-gray-700 mb-1 text-lg"
+                htmlFor="password"
+              >
                 Password
               </label>
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -105,7 +110,7 @@ const Signin = ({ setIsAuthenticated }) => {
 
           <div className="mt-6 text-center">
             <p className="font-parastoo text-gray-600 text-lg">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <button
                 onClick={() => navigate("/signup")}
                 className="font-gothic text-[#4CAF50] hover:text-[#388E3C] text-sm"

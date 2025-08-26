@@ -19,6 +19,7 @@ const Sell = () => {
 
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -43,7 +44,7 @@ const Sell = () => {
     form.append("bookImage", formData.bookImage);
 
     try {
-      const response = await api.post(`/api/v1/books/sell-book`, form, {
+      await api.post(`/api/v1/books/sell-book`, form, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -65,9 +66,7 @@ const Sell = () => {
         bookImage: null,
       });
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Something went wrong";
-      console.log(errorMessage);
+      setShowError(true);
     } finally {
       setLoading(false);
     }
@@ -99,10 +98,28 @@ const Sell = () => {
         </div>
       )}
 
-      {/* White Box Wrapper */}
+      {showError && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+          <div className="bg-white border-2 border-red-500 rounded-xl shadow-lg p-6 relative w-80 text-center">
+            <button
+              onClick={() => setShowError(false)}
+              className="absolute top-2 right-2 text-gray-600 text-xl"
+            >
+              <IoClose />
+            </button>
+            <p className="text-red-600 font-semibold text-lg mb-4">
+              Book Could not be sold! Please Try Again.
+            </p>
+            <img
+              src="/images/book-failed.png"
+              alt="Book not sold"
+              className="w-20 h-20 mx-auto"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-3xl shadow-xl flex flex-col lg:flex-row w-full max-w-7xl overflow-hidden">
-        
-        {/* Left Form Section */}
         <div className="w-full lg:w-1/2 p-6 sm:p-8 md:p-10 flex items-start justify-center">
           <div className="w-full max-w-md mt-6 sm:mt-10">
             <h2 className="text-2xl sm:text-3xl font-bold text-left text-blue-950 mb-6">
@@ -181,7 +198,7 @@ const Sell = () => {
                   <option value="History">History</option>
                   <option value="Social Science">Social Science</option>
                   <option value="Business">Business</option>
-                   <option value="Law">Law</option>
+                  <option value="Law">Law</option>
                   <option value="Medicine">Medicine</option>
                   <option value="Science">Science</option>
                   <option value="Mathematics">Mathematics</option>

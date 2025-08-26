@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosInstance.js";
-import Loader from "./Loader.jsx";
+import Loader from "../components/Loader.jsx";
 import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const res = await api.get(`/api/v1/cart`);
+        const res = await api.get("/api/v1/cart");
         const itemsWithSelection = res.data.data.cartItems.map((item) => ({
           ...item,
           selected: false,
@@ -38,10 +38,10 @@ const CartPage = () => {
 
   const handleAddToCart = async (bookId, quantity) => {
     try {
-      await api.post(
-        `/api/v1/cart/add`,
-        { bookId, quantity: parseInt(quantity) }
-      );
+      await api.post("/api/v1/cart/add", {
+        bookId,
+        quantity: parseInt(quantity),
+      });
 
       setCartItems((prev) =>
         prev.map((item) =>
@@ -60,31 +60,26 @@ const CartPage = () => {
       .filter((item) => item.selected)
       .map((item) => item._id);
     try {
-      await api.post(
-        `/api/v1/cart/remove`,
-        { ids: selectedIds }
-      );
+      await api.post("/api/v1/cart/remove", { ids: selectedIds });
       setCartItems((prev) => prev.filter((item) => !item.selected));
     } catch (error) {
       console.error("Error removing items:", error);
     }
   };
 
-const handlePlaceOrder = (e) => {
-    e.preventDefault()
+  const handlePlaceOrder = (e) => {
+    e.preventDefault();
     const selectedItems = cartItems.filter((item) => item.selected);
 
     if (selectedItems.length === 0) {
       alert("Please select at least one item to place an order.");
       return;
     }
-
-    // Store cart items in sessionStorage for the address page
     sessionStorage.removeItem("buyBook");
     sessionStorage.setItem("buyBooks", JSON.stringify(selectedItems));
-
-    // Navigate to address page (cart checkout flow)
-    navigate(`/buy/address?fromCart=true`, { state: { allow: true, books: selectedItems, totalAmount: totalAmount} });
+    navigate(`/buy/address?fromCart=true`, {
+      state: { allow: true, books: selectedItems, totalAmount: totalAmount },
+    });
   };
 
   const selectedItems = cartItems.filter((item) => item.selected);
@@ -95,12 +90,11 @@ const handlePlaceOrder = (e) => {
 
   return (
     <div className="p-4 md:flex gap-6 flex-col md:flex-row">
-      {/* Left Section */}
       <div className="md:w-2/3 w-full">
         <h2 className="font-gothic text-4xl font-bold mb-4">My Cart</h2>
 
         {loading ? (
-          <Loader/>
+          <Loader />
         ) : cartItems.length === 0 ? (
           <p className="font-parastoo text-lg text-gray-600">
             Your cart is empty now.
@@ -113,20 +107,23 @@ const handlePlaceOrder = (e) => {
                   type="checkbox"
                   checked={
                     selectedItems.length > 0 &&
-                    selectedItems.length === cartItems.filter(item => item.book.count > 0).length
+                    selectedItems.length ===
+                      cartItems.filter((item) => item.book.count > 0).length
                   }
                   onChange={(e) =>
                     setCartItems((prev) =>
                       prev.map((item) => ({
                         ...item,
-                        selected: item.book.count > 0 ? e.target.checked : false,
+                        selected:
+                          item.book.count > 0 ? e.target.checked : false,
                       }))
                     )
                   }
                 />
                 <span className="font-gothic text-base font-semibold">
                   {selectedItems.length}/
-                  {cartItems.filter((item) => item.book.count > 0).length} ITEMS SELECTED
+                  {cartItems.filter((item) => item.book.count > 0).length} ITEMS
+                  SELECTED
                 </span>
               </div>
               <button
@@ -204,7 +201,6 @@ const handlePlaceOrder = (e) => {
         )}
       </div>
 
-      {/* Right Section */}
       {!loading && cartItems.length > 0 && (
         <div className="md:w-1/3 w-full border p-4 rounded-lg mt-6 md:mt-0">
           <h3 className="font-gothic font-semibold mb-4">

@@ -15,31 +15,31 @@ const RouteTitle = () => {
       case "/signup":
         document.title = "SignUp Page - Book Cart";
         break;
-     case "/sell":
+      case "/sell":
         document.title = "Sell Form Page - Book Cart";
         break;
-        case "/sold-items":
+      case "/sold-items":
         document.title = "Items Sold by user Page - Book Cart";
         break;
-        case "/myprofile":
+      case "/myprofile":
         document.title = "User profile page - Book Cart";
         break;
-        case "/search":
+      case "/search":
         document.title = "Search Results - Book Cart";
         break;
-        case "/settings":
+      case "/settings":
         document.title = "User profile page changes settings page - Book Cart";
         break;
-        case "/address":
+      case "/address":
         document.title = "Manage addresses for users page - Book Cart";
         break;
-        case "/orders":
+      case "/orders":
         document.title = "My Orders - Book Cart";
         break;
-        case "/myprofile/wishlist":
+      case "/myprofile/wishlist":
         document.title = "Users wishlist page - Book Cart";
         break;
-        case "/myprofile/cart":
+      case "/myprofile/cart":
         document.title = "Items in cart page- Book Cart";
         break;
       default:

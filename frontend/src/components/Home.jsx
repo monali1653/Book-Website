@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Loader from "../components/Loader";
+import { FaHeart, FaShoppingCart } from "react-icons/fa";
 
 export const Home = ({ isAuthenticated }) => {
   const navigate = useNavigate();
@@ -23,14 +24,13 @@ export const Home = ({ isAuthenticated }) => {
     navigate(`/category/${formattedName}`);
   };
 
-   const handleSeeMore = () => {
+  const handleSeeMore = () => {
     navigate("/books");
   };
 
   if (loading) return <Loader />;
   return (
     <>
-      {/* HERO SECTION */}
       <div className="bg-orange-50 min-h-screen flex items-center justify-center px-2 sm:px-4">
         <div className="bg-white rounded-3xl shadow-2xl flex flex-col md:flex-row items-start justify-between w-full max-w-[90%] h-auto p-6 md:p-16">
           <div className="md:w-1/2 flex flex-col justify-center">
@@ -38,28 +38,32 @@ export const Home = ({ isAuthenticated }) => {
               The Store that Feeds Your Mind. Visit Us Today!!
             </h2>
             <p className="font-parastoo text-lg md:text-xl text-gray-800 mb-8">
-              Your one-stop shop for books of every genre! Where you can browse, buy, and sell books in minutes!
+              Your one-stop shop for books of every genre! Where you can browse,
+              buy, and sell books in minutes!
             </p>
             {isAuthenticated ? (
               <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                 <button
                   onClick={() => navigate("/myprofile/wishlist")}
-                  className="font-gothic text-pink-600 border border-pink-500 px-4 py-1 rounded-full font-semibold hover:bg-pink-100"
+                  className="flex items-center gap-2 font-gothic text-pink-600 border border-pink-500 px-4 py-1 rounded-full font-semibold hover:bg-pink-100"
                 >
-                  ❤️ Wishlist
+                  <FaHeart />
+                  <span>Wishlist</span>
                 </button>
+
                 <button
                   onClick={() => navigate("/myprofile/cart")}
-                  className="font-gothic text-blue-600 border border-blue-500 px-4 py-1 rounded-full font-semibold hover:bg-blue-100"
+                  className="flex items-center gap-2 font-gothic text-blue-600 border border-blue-500 px-4 py-1 rounded-full font-semibold hover:bg-blue-100"
                 >
-                  🛒 Cart
+                  <FaShoppingCart />
+                  <span>Cart</span>
                 </button>
               </div>
             ) : (
               <div className="text-left">
                 <button
                   onClick={() => navigate("/login")}
-                  className="font-gothic bg-orange-500 text-white text-sm font-medium px-3 py-2 rounded hover:bg-orange-600 transition"
+                  className="font-gothic bg-orange-500 text-white text-sm font-medium px-3 py-2 rounded hover:bg-orange-600 transition flex items-center gap-1"
                 >
                   Explore Now →
                 </button>
@@ -78,10 +82,10 @@ export const Home = ({ isAuthenticated }) => {
 
       {isAuthenticated && (
         <>
-         
-          {/* SHOP BY CATEGORY */}
           <div id="categories" className="p-8 bg-orange-50">
-            <h2 className="font-gothic text-3xl font-bold mb-6 text-center">Shop By Category</h2>
+            <h2 className="font-gothic text-3xl font-bold mb-6 text-center">
+              Shop By Category
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {categories.map((category, index) => (
                 <div
@@ -113,31 +117,42 @@ export const Home = ({ isAuthenticated }) => {
                     alt={category.name}
                     className="w-16 h-16 object-cover rounded-full mr-4"
                   />
-                  <h3 className="font-parastoo text-2xl font-semibold text-gray-800">{category.name}</h3>
+                  <h3 className="font-parastoo text-2xl font-semibold text-gray-800">
+                    {category.name}
+                  </h3>
                 </div>
               ))}
-               <div className="col-span-1 sm:col-span-2 md:col-span-4 flex justify-end mt-4">
-          <button
-            onClick={handleSeeMore}
-            className="font-gothic font-semibold text-black underline text-lg hover:text-gray-700 transition-colors"
-          >
-            See More →
-          </button>
-        </div>
+              <div className="col-span-1 sm:col-span-2 md:col-span-4 flex justify-end mt-4">
+                <button
+                  onClick={handleSeeMore}
+                  className="font-gothic font-semibold text-black underline text-lg hover:text-gray-700 transition-colors"
+                >
+                  See More →
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* EXCHANGE SECTION */}
-          <div id="exchange" className="p-8 bg-orange-50 flex flex-col items-center">
+          <div className="p-8 bg-orange-50 flex flex-col items-center">
             <div className="bg-white bg-opacity-90 p-8 rounded-3xl shadow-lg w-full">
               <div className="w-full flex flex-col md:flex-row justify-between items-center">
                 <div className="md:w-1/2 pr-6">
-                  <h3 className="font-gothic text-3xl sm:text-4xl font-bold mb-4">Buy or Sell any book of your choice</h3>
-                  <p className="font-gothic text-xl sm:text-2xl font-semibold mb-2">Give your books countless lives by selling !!</p>
-                  <p className="font-edu font-medium text-base italic">Buy all trendy books.</p>
+                  <h3 className="font-gothic text-3xl sm:text-4xl font-bold mb-4">
+                    Buy or Sell any book of your choice
+                  </h3>
+                  <p className="font-gothic text-xl sm:text-2xl font-semibold mb-2">
+                    Give your books countless lives by selling !!
+                  </p>
+                  <p className="font-edu font-medium text-base italic">
+                    Buy all trendy books.
+                  </p>
                 </div>
                 <div className="md:w-1/2 flex justify-center items-center mt-6 md:mt-0">
-                  <img src="/images/exch1.png" alt="Books Exchange" className="object-cover" />
+                  <img
+                    src="/images/exch1.png"
+                    alt="Books Exchange"
+                    className="object-cover"
+                  />
                 </div>
               </div>
             </div>

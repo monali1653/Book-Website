@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import Loader from "./Loader";
+import Loader from "../components/Loader.jsx";
 import api from "../api/axiosInstance.js";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const AdminDashboard = () => {
   const [pendingBooks, setPendingBooks] = useState([]);
@@ -10,10 +11,8 @@ const AdminDashboard = () => {
 
   const fetchPendingBooks = async () => {
     try {
-      const res = await api.get(`/api/v1/admin/pending`, {
-        withCredentials: true,
-      });
-      setPendingBooks(res.data);
+      const res = await api.get("/api/v1/admin/pending");
+      setPendingBooks(res.data.data);
     } catch (error) {
       console.error("Failed to fetch pending books", error);
     } finally {
@@ -23,7 +22,7 @@ const AdminDashboard = () => {
 
   const handleApprove = async (bookId) => {
     try {
-      await api.put(`/api/v1/admin/approve`, {bookId}, { withCredentials: true });
+      await api.put("/api/v1/admin/approve", {bookId});
       setPendingBooks((prev) => prev.filter((book) => book._id !== bookId));
     } catch (error) {
       console.error("Approve failed", error);
@@ -35,9 +34,8 @@ const AdminDashboard = () => {
 
     try {
       await api.put(
-        `/api/v1/admin/reject`,
-        { bookId, message: rejectionMessage },
-        { withCredentials: true }
+        "/api/v1/admin/reject",
+        { bookId, message: rejectionMessage }
       );
       setPendingBooks((prev) => prev.filter((book) => book._id !== bookId));
       setRejectingBookId(null);
@@ -55,7 +53,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">📚 Pending Book Submissions</h1>
+      <h1 className="text-2xl font-bold mb-6">Pending Book Submissions</h1>
       {pendingBooks.length === 0 ? (
         <p>No books pending approval.</p>
       ) : (
@@ -99,16 +97,16 @@ const AdminDashboard = () => {
               ) : (
                 <div className="flex gap-4 mt-4">
                   <button
-                    className="bg-green-600 text-white px-4 py-2 rounded"
+                    className="flex bg-green-600 text-white px-4 py-2 rounded"
                     onClick={() => handleApprove(book._id)}
                   >
-                    ✅ Approve
+                    <FaCheckCircle className="mt-1 mr-1"/> Approve
                   </button>
                   <button
-                    className="bg-red-500 text-white px-4 py-2 rounded"
+                    className="flex bg-red-500 text-white px-4 py-2 rounded"
                     onClick={() => setRejectingBookId(book._id)}
                   >
-                    ❌ Reject
+                    <FaTimesCircle className="mt-1 mr-1"/> Reject
                   </button>
                 </div>
               )}

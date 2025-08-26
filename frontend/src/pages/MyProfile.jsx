@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FaUser, FaEnvelope, FaPhone, FaBoxOpen,
-  FaCheckCircle, FaHeart, FaShoppingCart
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaBoxOpen,
+  FaCheckCircle,
+  FaHeart,
+  FaShoppingCart,
 } from "react-icons/fa";
 import api from "../api/axiosInstance.js";
+import Loader from "../components/Loader.jsx";
 
 const MyProfile = () => {
   const navigate = useNavigate();
-  const [showPersonalPopup, setShowPersonalPopup] = useState(false);
-  const [showAddressPopup, setShowAddressPopup] = useState(false);
   const [addresses, setAddresses] = useState([]);
-  const [newAddress, setNewAddress] = useState({
-    name: "", phone: "", address: "", locality: "", pincode: "", city: "", state: ""
-  });
   const [user, setUser] = useState(null);
   const [editUser, setEditUser] = useState(null);
 
@@ -31,38 +32,44 @@ const MyProfile = () => {
     fetchUser();
   }, []);
 
-  if (!user) return <div className="p-6">Loading profile...</div>;
+  if (!user)
+    return (
+      <div className="p-6">
+        <Loader />
+      </div>
+    );
   const avatarName = user.avatar?.split("/").pop().replace(".jpg", "");
 
   return (
     <div className="flex justify-center px-4 py-10">
       <div className="w-full max-w-4xl">
-        {/* Profile Header */}
         <div className="flex items-center space-x-4 mb-4">
           <img
             src={`/images/${avatarName}.jpg`}
             alt="Avatar"
             className="w-10 h-10 rounded-full"
           />
-          <h2 className="font-gothic text-2xl font-semibold">{user.fullName}</h2>
+          <h2 className="font-gothic text-2xl font-semibold">
+            {user.fullName}
+          </h2>
         </div>
 
-        {/* Contact Info */}
         <div className="mb-6 space-y-1">
           <p className="font-parastoo text-lg flex items-center">
-            <FaUser className="text-black mr-2" />{user.username}
+            <FaUser className="text-black mr-2" />
+            {user.username}
           </p>
           <p className="font-parastoo text-lg flex items-center">
-            <FaEnvelope className="text-black mr-2" />{user.email}
+            <FaEnvelope className="text-black mr-2" />
+            {user.email}
           </p>
           <p className="font-parastoo text-lg flex items-center">
-            <FaPhone className="text-black mr-2" />{user.phoneNo}
+            <FaPhone className="text-black mr-2" />
+            {user.phoneNo}
           </p>
         </div>
 
-        {/* Navigation Buttons in 2 rows */}
         <div className="font-gothic font-semibold flex flex-col gap-4">
-          {/* First Row */}
           <div className="flex gap-4">
             <button
               onClick={() => navigate("/myprofile/orders")}

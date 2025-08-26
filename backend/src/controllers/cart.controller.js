@@ -10,7 +10,7 @@ const getCart = asyncHandler(async (req, res) => {
   if (!user) throw new ApiError(404, "User not found");
 
   const cartItems = user.cart
-    .filter(item => item.book) // avoid null books
+    .filter(item => item.book)
     .map(item => ({
       _id: item._id,
       book: {
@@ -53,13 +53,10 @@ const addToCart = asyncHandler(async (req, res) => {
     );
 
     if (existingItem) {
-
       if (quantity > book.quantity) {
         throw new ApiError(400, `You already have ${existingItem.quantity} in your cart. Only ${book.quantity} total available.`)
       }
-
       existingItem.quantity = quantity;
-
     } else {
       user.cart.push({ book: bookId, quantity });
     }
@@ -67,7 +64,7 @@ const addToCart = asyncHandler(async (req, res) => {
     await user.save();
 
     return res.status(200).json(
-        new ApiResponse(200,{ cart: user.cart },"Item added to cart successfully")
+      new ApiResponse(200,{ cart: user.cart },"Item added to cart successfully")
     )
   } catch (err) {
     console.error("AddToCart Error:", err);
@@ -76,7 +73,7 @@ const addToCart = asyncHandler(async (req, res) => {
 });
 
 const removeCartItems = asyncHandler(async (req, res) => {
-  const { ids } = req.body; // Array of book IDs to remove
+  const { ids } = req.body;
 
   try {
     await User.findByIdAndUpdate(req.user._id, {
@@ -84,9 +81,8 @@ const removeCartItems = asyncHandler(async (req, res) => {
         cart: { _id: { $in: ids } }
       }
     });
-
     return res.status(200).json(
-        new ApiResponse(200,"Selected items removed from cart")
+      new ApiResponse(200,"Selected items removed from cart")
     )
   } catch (err) {
     throw new ApiError(500,"Failed to remove item from the cart")

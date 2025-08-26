@@ -11,7 +11,7 @@ const checkout = asyncHandler(async (req, res) => {
   }
 
   const options = {
-    amount: Number(money), // Razorpay works in paise
+    amount: Number(money),
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
     payment_capture: 1,
@@ -21,12 +21,16 @@ const checkout = asyncHandler(async (req, res) => {
     const order = await instance.orders.create(options);
     console.log(order);
     res.status(200).json(
-      new ApiResponse(200, {
-        orderId: order.id,
-        amount: order.amount,
-        currency: order.currency,
-        key: process.env.RAZORPAY_KEY_ID,
-      }, "successful")
+      new ApiResponse(
+        200,
+        {
+          orderId: order.id,
+          amount: order.amount,
+          currency: order.currency,
+          key: process.env.RAZORPAY_KEY_ID,
+        },
+        "successful"
+      )
     );
   } catch (error) {
     console.error(error);

@@ -6,7 +6,6 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import PersonAdd from "@mui/icons-material/PersonAdd";
 import Settings from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -22,7 +21,7 @@ export function Menubar({ onLogout, user }) {
   const handleClose = () => setAnchorEl(null);
 
   const initial = user?.fullName?.[0]?.toUpperCase() || "?";
-  const avatarUrl = user?.avatar; // Assume this is a full image URL or base64 string
+  const avatarUrl = user?.avatar;
   const role = user?.role;
 
   return (
@@ -37,7 +36,10 @@ export function Menubar({ onLogout, user }) {
           aria-expanded={open ? "true" : undefined}
         >
           {avatarUrl ? (
-            <Avatar src={avatarUrl} sx={{ width: 40, height: 40 }} />
+            <Avatar
+              src={avatarUrl}
+              sx={{ width: { xs: 30, sm: 40 }, height: { xs: 30, sm: 40 } }}
+            />
           ) : (
             <Avatar sx={{ width: 40, height: 40 }}>{initial}</Avatar>
           )}
@@ -107,10 +109,11 @@ export function Menubar({ onLogout, user }) {
         )}
 
         <Divider />
-
-
-
-        <MenuItem onClick={()=>{navigate("/settings")}}>
+        <MenuItem
+          onClick={() => {
+            navigate("/settings");
+          }}
+        >
           <ListItemIcon>
             <Settings fontSize="small" />
           </ListItemIcon>

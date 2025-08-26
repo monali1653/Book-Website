@@ -25,7 +25,7 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      default: "placed",
+      default: "Order Placed",
     },
     totalAmount: {
       type: Number,

@@ -2,13 +2,12 @@ import { Book } from "../models/book.model.js";
 import { asyncHandler } from "../utils/asynchandler.js";
 import {ApiError} from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { User } from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 
 const sellBook = asyncHandler(async (req,res) => {
     let {bookname, category, author, description, price, count} = req.body;
     if([bookname, category, author, description, price].some((field) => field ?.trim() ==="")) {
-        throw new ApiError(400, "All fields are required")
+      throw new ApiError(400, "All fields are required")
     }
     category = category.toLowerCase()
     
@@ -33,10 +32,10 @@ const sellBook = asyncHandler(async (req,res) => {
     })
 
     if(!pendingBook) {
-        throw new ApiError(500,"Something went wrong while adding the book")
+      throw new ApiError(500,"Something went wrong while adding the book")
     }
     return res.status(200).json(
-        new ApiResponse(200, pendingBook,"Book sold successfully")
+      new ApiResponse(200, pendingBook,"Book sold successfully")
     )
 })
 
@@ -55,7 +54,7 @@ const buyBook = asyncHandler(async (req,res) => {
             }
             await book.save()
             return res.status(200).json(
-                new ApiResponse(200,book,"Book purchased succesfully")
+              new ApiResponse(200,book,"Book purchased succesfully")
             )
         } else {
             throw new ApiError(400,"Book is out of stock")
@@ -68,18 +67,16 @@ const buyBook = asyncHandler(async (req,res) => {
 const fetchAllBooks = asyncHandler(async (req, res) => {
   try {
     const books = await Book.find({ status: "approved" });
-    res.status(200).json(books);
+    res.status(200).json(new ApiResponse(200,books,"All books fetched successfully"));
   } catch (error) {
     console.error("Error fetching all books:", error);
-    res.status(500).json({ message: "Server error" });
+    throw new ApiError(500,"Internal Server Error")
   }
 });
 
-
- const getBooksSoldByMe = asyncHandler(async (req, res) => {
+const getBooksSoldByMe = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
-  // Find all books posted by this user
   const soldBooks = await Book.find({ seller: userId }).sort({ updatedAt: -1 });
 
   return res.status(200).json(
@@ -91,22 +88,29 @@ const searchBooks = asyncHandler(async (req, res) => {
   const { query } = req.query;
 
   if (!query || query.trim() === "") {
-    return res.status(400).json({ message: "Search query is required" });
+    throw new ApiError(400, "Search query is required")
   }
 
-  const regex = new RegExp(query.trim(), "i"); // case-insensitive search
+  const regex = new RegExp(query.trim(), "i");
 
-  const books = await Book.find({
-    $or: [
-      { bookname: { $regex: regex } },
-      { author: { $regex: regex } },
-      { category: { $regex: regex } },
-    ],
-  });
-
-  res.status(200).json(books);
+  const books = await Book.aggregate([
+    {
+      $match: {
+        $or: [
+          { bookname: { $regex: regex } },
+          { author: { $regex: regex } },
+          { category: { $regex: regex } },
+        ],
+      },
+    },
+    {
+      $limit: 5,
+    },
+  ]);
+  return res.status(200).json(
+    new ApiResponse(200, books, "Books are searched successfully")
+  )
 });
-
 
 export {
     sellBook,
