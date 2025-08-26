@@ -1,16 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { FaUser } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import api from '../api/axiosInstance.js';
+import { useState, useEffect, useRef } from "react";
+import { FaUser, FaExclamationTriangle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import api from "../api/axiosInstance.js";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
+  const toastShown = useRef(false);
 
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
   const [editStates, setEditStates] = useState({
     fullName: false,
@@ -19,25 +20,22 @@ const SettingsPage = () => {
   });
 
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [step, setStep] = useState(1);
 
-  const [errorMessage, setErrorMessage] = useState('');
-  const [matchError, setMatchError] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [matchError, setMatchError] = useState("");
 
-  const toastShown = useRef(false);
-
-
-  // Delete account state
   const [showDeletePrompt, setShowDeletePrompt] = useState(false);
   const [confirmDeleteStep, setConfirmDeleteStep] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleteError, setDeleteError] = useState('');
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+
   const fetchUserDetails = async () => {
     try {
-      const res = await api.get(`/api/v1/users/myprofile`);
+      const res = await api.get("/api/v1/users/myprofile");
       const { fullName, email, phoneNo } = res.data.data;
       setFullName(fullName);
       setEmail(email);
@@ -46,17 +44,61 @@ const SettingsPage = () => {
       console.error("Error fetching user profile", error);
     }
   };
-  
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
+
   const updateField = async (field) => {
+    let newValue,
+      payload = {};
+
+    if (field === "fullName") {
+      newValue = fullName;
+      payload.fullName = newValue;
+    } else if (field === "email") {
+      newValue = email;
+      const emailInput = document.querySelector('input[type="email"]');
+      if (emailInput && !emailInput.checkValidity()) {
+        toast.error("Please enter a valid email address", {
+          position: "bottom-center",
+          autoClose: 2000,
+        });
+        return;
+      }
+      payload.email = newValue;
+    } else if (field === "phone") {
+      newValue = phone;
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!phoneRegex.test(newValue)) {
+        toast.error("Please enter valid mobile number", {
+          position: "bottom-center",
+          autoClose: 2000,
+        });
+        return;
+      }
+      payload.phoneNo = newValue;
+    }
+
     try {
-      await api.put(
-        `${import.meta.env.VITE_API_BASE_URL}/api/v1/users/update`,
-        { fullName, email, phoneNo: phone }
-      );
+      await api.put("/api/v1/users/update", payload);
+      setOriginalValues((prev) => ({
+        ...prev,
+        [field === "phone" ? "phoneNo" : field]: newValue,
+      }));
+
       setEditStates((prev) => ({ ...prev, [field]: false }));
-      navigate("/myprofile", { replace: true });
+
+      toast.success(`${field} updated successfully`, {
+        position: "bottom-center",
+        autoClose: 2000,
+      });
     } catch (err) {
       console.error("Failed to update", err);
+      toast.error(`Failed to update ${field}`, {
+        position: "bottom-center",
+        autoClose: 2000,
+      });
     }
   };
 
@@ -67,9 +109,12 @@ const SettingsPage = () => {
     }
 
     try {
-      await api.post(`/api/v1/users/changepassword`, { oldPassword, newPassword: oldPassword });
+      await api.post("/api/v1/users/changepassword", {
+        oldPassword,
+        newPassword: oldPassword,
+      });
       setStep(2);
-      setErrorMessage('');
+      setErrorMessage("");
     } catch (err) {
       setErrorMessage("Old password is incorrect.");
     }
@@ -82,17 +127,17 @@ const SettingsPage = () => {
     }
 
     try {
-      await api.post(
-        `/api/v1/users/changepassword`,
-        { oldPassword, newPassword }
-      );
+      await api.post("/api/v1/users/changepassword", {
+        oldPassword,
+        newPassword,
+      });
 
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmNewPassword('');
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
       setShowPasswordPrompt(false);
       setStep(1);
-      setMatchError('');
+      setMatchError("");
 
       if (!toastShown.current) {
         toast.success("Password changed successfully!", {
@@ -110,20 +155,20 @@ const SettingsPage = () => {
   };
 
   const handleEdit = (field) => setEditStates({ ...editStates, [field]: true });
-  const handleCancel = (field) => setEditStates({ ...editStates, [field]: false });
+  const handleCancel = (field) =>
+    setEditStates({ ...editStates, [field]: false });
 
   const handleDeleteAccount = async () => {
     try {
-      await api.post(
-        `/api/v1/users/delete-account`,
-        { password: deletePassword }
-      );
+      await api.post("/api/v1/users/delete-account", {
+        password: deletePassword,
+      });
       toast.success("Account deleted successfully. Redirecting...", {
         position: "bottom-center",
         autoClose: 2000,
       });
       setTimeout(() => {
-        navigate('/signup');
+        navigate("/signup");
       }, 2000);
     } catch (err) {
       setDeleteError("Incorrect password. Please try again.");
@@ -132,33 +177,62 @@ const SettingsPage = () => {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
-      {/* Sidebar */}
       <div className="w-full md:w-1/4 p-6 bg-gray-50 border-r space-y-6">
-        <h2 className="font-gothic text-lg font-semibold text-center">Hello!</h2>
+        <h2 className="font-gothic text-lg font-semibold text-center">
+          Hello!
+        </h2>
         <div>
           <h3 className="font-gothic font-bold text-gray-600 flex items-center">
             <FaUser className="text-green-500 mr-2" /> Account Settings
           </h3>
-          <button onClick={() => navigate("/settings")} className="font-parastoo font-bold ml-6 text-lg">Personal Info</button><br />
-          <button onClick={() => navigate("/address")} className="ml-6 text-lg font-parastoo">Manage Address</button>
+          <button
+            onClick={() => navigate("/settings")}
+            className="font-parastoo font-bold ml-6 text-lg"
+          >
+            Personal Info
+          </button>
+          <br />
+          <button
+            onClick={() => navigate("/address")}
+            className="ml-6 text-lg font-parastoo"
+          >
+            Manage Address
+          </button>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 p-6">
-        <h1 className="font-gothic text-2xl font-bold mb-4">Account Settings</h1>
-        <h2 className="font-gothic text-xl font-semibold mb-6 text-green-600">Profile Information</h2>
+        <h1 className="font-gothic text-2xl font-bold mb-4">
+          Account Settings
+        </h1>
+        <h2 className="font-gothic text-xl font-semibold mb-6 text-green-600">
+          Profile Information
+        </h2>
 
-        {/* Full Name */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <h3 className="font-parastoo text-xl font-semibold">Full Name</h3>
             {!editStates.fullName ? (
-              <button onClick={() => handleEdit('fullName')} className="font-parastoo text-green-600 font-medium hover:underline">Edit</button>
+              <button
+                onClick={() => handleEdit("fullName")}
+                className="font-parastoo text-green-600 font-medium hover:underline"
+              >
+                Edit
+              </button>
             ) : (
               <div className="space-x-2">
-                <button onClick={() => handleCancel('fullName')} className="font-parastoo text-green-600 hover:underline">Cancel</button>
-                <button onClick={() => updateField('fullName')} className="font-gothic bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">Save</button>
+                <button
+                  onClick={() => handleCancel("fullName")}
+                  className="font-parastoo text-green-600 hover:underline"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateField("fullName")}
+                  className="font-gothic bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+                >
+                  Save
+                </button>
               </div>
             )}
           </div>
@@ -167,20 +241,40 @@ const SettingsPage = () => {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             disabled={!editStates.fullName}
-            className={`font-parastoo w-full mt-2 p-3 border rounded ${editStates.fullName ? 'border-green-500 bg-white' : 'bg-gray-100 text-gray-500'}`}
+            className={`font-parastoo w-full mt-2 p-3 border rounded ${
+              editStates.fullName
+                ? "border-green-500 bg-white"
+                : "bg-gray-100 text-gray-500"
+            }`}
           />
         </div>
 
-        {/* Email */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-parastoo text-xl font-semibold">Email Address</h3>
+            <h3 className="font-parastoo text-xl font-semibold">
+              Email Address
+            </h3>
             {!editStates.email ? (
-              <button onClick={() => handleEdit('email')} className="font-parastoo text-green-600 font-medium hover:underline">Edit</button>
+              <button
+                onClick={() => handleEdit("email")}
+                className="font-parastoo text-green-600 font-medium hover:underline"
+              >
+                Edit
+              </button>
             ) : (
               <div className="space-x-2">
-                <button onClick={() => handleCancel('email')} className="font-parastoo text-green-600 hover:underline">Cancel</button>
-                <button onClick={() => updateField('email')} className="bg-green-600 font-gothic text-white px-4 py-1 rounded hover:bg-green-700">Save</button>
+                <button
+                  onClick={() => handleCancel("email")}
+                  className="font-parastoo text-green-600 hover:underline"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateField("email")}
+                  className="bg-green-600 font-gothic text-white px-4 py-1 rounded hover:bg-green-700"
+                >
+                  Save
+                </button>
               </div>
             )}
           </div>
@@ -189,20 +283,40 @@ const SettingsPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={!editStates.email}
-            className={`font-parastoo w-full mt-2 p-3 border rounded ${editStates.email ? 'border-green-500 bg-white' : 'bg-gray-100 text-gray-500'}`}
+            className={`font-parastoo w-full mt-2 p-3 border rounded ${
+              editStates.email
+                ? "border-green-500 bg-white"
+                : "bg-gray-100 text-gray-500"
+            }`}
           />
         </div>
 
-        {/* Phone */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-parastoo text-xl font-semibold">Mobile Number</h3>
+            <h3 className="font-parastoo text-xl font-semibold">
+              Mobile Number
+            </h3>
             {!editStates.phone ? (
-              <button onClick={() => handleEdit('phone')} className="font-parastoo text-green-600 font-medium hover:underline">Edit</button>
+              <button
+                onClick={() => handleEdit("phone")}
+                className="font-parastoo text-green-600 font-medium hover:underline"
+              >
+                Edit
+              </button>
             ) : (
               <div className="space-x-2">
-                <button onClick={() => handleCancel('phone')} className="font-parastoo text-green-600 hover:underline">Cancel</button>
-                <button onClick={() => updateField('phone')} className="font-gothic bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700">Save</button>
+                <button
+                  onClick={() => handleCancel("phone")}
+                  className="font-parastoo text-green-600 hover:underline"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateField("phone")}
+                  className="font-gothic bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+                >
+                  Save
+                </button>
               </div>
             )}
           </div>
@@ -211,16 +325,19 @@ const SettingsPage = () => {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             disabled={!editStates.phone}
-            className={`font-parastoo w-full mt-2 p-3 border rounded ${editStates.phone ? 'border-green-500 bg-white' : 'bg-gray-100 text-gray-500'}`}
+            className={`font-parastoo w-full mt-2 p-3 border rounded ${
+              editStates.phone
+                ? "border-green-500 bg-white"
+                : "bg-gray-100 text-gray-500"
+            }`}
           />
         </div>
 
-        {/* Change Password Section */}
         <div className="mt-8">
           {!showPasswordPrompt ? (
             <button
               onClick={() => setShowPasswordPrompt(true)}
-              className="text-green-600 font-gothic text-lg"
+              className="text-green-600 font-gothic text-lg bg-green-100 p-2 rounded-md"
             >
               Change your password
             </button>
@@ -245,7 +362,9 @@ const SettingsPage = () => {
                   >
                     Confirm
                   </button>
-                  {errorMessage && <p className="text-red-600 text-sm">{errorMessage}</p>}
+                  {errorMessage && (
+                    <p className="text-red-600 text-sm">{errorMessage}</p>
+                  )}
                 </>
               )}
 
@@ -271,26 +390,29 @@ const SettingsPage = () => {
                   >
                     Save
                   </button>
-                  {matchError && <p className="text-red-600 text-sm">{matchError}</p>}
+                  {matchError && (
+                    <p className="text-red-600 text-sm">{matchError}</p>
+                  )}
                 </>
               )}
             </div>
           )}
         </div>
 
-        {/* Delete Account Section */}
         <div className="mt-10">
           {!showDeletePrompt ? (
             <button
               onClick={() => setShowDeletePrompt(true)}
-              className="text-red-600 font-gothic text-lg"
+              className="text-red-600 font-gothic text-lg bg-red-200 p-2 rounded-md"
             >
               Delete your account
             </button>
           ) : (
             <div className="space-y-4 border border-red-300 bg-red-50 p-4 rounded-md mt-4">
-              <p className="text-red-700 font-parastoo text-md">
-                ⚠ If you delete your account, all your data will be lost permanently.
+              <p className="flex text-red-700 font-parastoo text-md">
+                <FaExclamationTriangle className="mt-1 mr-1 text-yellow-600" />{" "}
+                If you delete your account, all your data will be lost
+                permanently.
               </p>
 
               {!confirmDeleteStep ? (
@@ -323,7 +445,9 @@ const SettingsPage = () => {
                   >
                     Delete Account
                   </button>
-                  {deleteError && <p className="text-red-600 text-sm">{deleteError}</p>}
+                  {deleteError && (
+                    <p className="text-red-600 text-sm">{deleteError}</p>
+                  )}
                 </div>
               )}
             </div>

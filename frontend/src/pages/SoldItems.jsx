@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api/axiosInstance.js";
+import Loader from "../components/Loader.jsx";
 
 const SoldItems = () => {
   const [soldBooks, setSoldBooks] = useState([]);
@@ -25,9 +26,13 @@ const SoldItems = () => {
       <h1 className="font-gothic text-4xl font-bold mb-6">Books Sold By Me!</h1>
 
       {loading ? (
-        <p className="font-parastoo text-lg text-gray-600">Loading...</p>
+        <p className="font-parastoo text-lg text-gray-600">
+          <Loader />
+        </p>
       ) : soldBooks.length === 0 ? (
-        <p className="font-parastoo text-lg text-gray-600">No books sold yet.</p>
+        <p className="font-parastoo text-lg text-gray-600">
+          No books sold yet.
+        </p>
       ) : (
         <div className="space-y-4">
           {soldBooks.map((book) => (

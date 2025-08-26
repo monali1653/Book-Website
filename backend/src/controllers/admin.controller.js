@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asynchandler.js";
 
 const getPendingBooks = asyncHandler(async (req,res) => {
     const pending = await Book.find({status: "pending"}).sort({createdAt: -1})
-    res.json(pending)
+    res.status(200).json(new ApiResponse(200,pending, "Pending books fetched successfully"))
 })
 
 const approveBook = asyncHandler(async (req,res) => {

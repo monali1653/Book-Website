@@ -1,28 +1,26 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
+import { FaExclamationTriangle } from "react-icons/fa";
 import api from "../api/axiosInstance.js";
+import Loader from "../components/Loader.jsx";
 
-export default function AddressPage() {
+function AddressPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Buy Now book
   const storedBook = sessionStorage.getItem("buyBook");
   const bookData = location.state?.book || (storedBook ? JSON.parse(storedBook) : null);
 
-  // Check if coming from cart
   const fromCart = new URLSearchParams(location.search).get("fromCart") === "true";
 
   const [addresses, setAddresses] = useState([]);
   const [selectedAddrId, setSelectedAddrId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showSheet, setShowSheet] = useState(false);
-  const [bookPrice, setBookPrice] = useState(bookData?.price || null);
+  const bookPrice = bookData?.price || null;
+  const cartBooks = fromCart ? location.state?.books : [];
 
-  const [cartBooks, setCartBooks] = useState(fromCart ? location.state?.books || [] : []);
-
-  // Load Razorpay script
   function loadRazorpay() {
     return new Promise((res) => {
       if (window.Razorpay) return res(true);
@@ -34,10 +32,8 @@ export default function AddressPage() {
     });
   }
 
-  // Redirect guard for Buy Now
   useEffect(() => {
     const last = sessionStorage.getItem("lastOrderedBook");
-
     if (!fromCart) {
       const bookId = new URLSearchParams(location.search).get("book");
       if (!bookId || (bookId === last && !location.state?.allow)) {
@@ -46,9 +42,8 @@ export default function AddressPage() {
     }
   }, [fromCart, location.state, navigate]);
 
-  // Fetch addresses
   useEffect(() => {
-    (async () => {
+    const fetchAddress = async () => {
       try {
         const res = await api.get("/api/v1/users/get-addresses");
         const arr = res.data.data;
@@ -59,7 +54,9 @@ export default function AddressPage() {
       } finally {
         setLoading(false);
       }
-    })();
+    }
+
+    fetchAddress();
   }, []);
 
   const current = addresses.find((a) => a._id === selectedAddrId);
@@ -117,13 +114,8 @@ export default function AddressPage() {
         description: fromCart ? "Cart purchase" : "Book purchase",
         handler: async (resp) => {
           try {
-            // 1️⃣ Verify payment
             await api.post("/api/v1/payment/verifyPayment", resp);
-
-            // 2️⃣ Place order on backend
             await api.post("/api/v1/users/order-place", orderPayload);
-
-            // 3️⃣ Navigate to orders page
             navigate("/myprofile/orders", { replace: true });
           } catch (err) {
             console.error(err);
@@ -144,18 +136,24 @@ export default function AddressPage() {
     }
   };
 
-  if (loading) return <p className="p-8">Loading…</p>;
+  if (loading) return <Loader/>
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-6">
       {current ? (
         <div className="border rounded-lg p-4 space-y-1">
           <p className="font-medium">{current.name}</p>
-          <p>{current.address}, {current.locality}</p>
-          <p>{current.city}, {current.state} {current.pincode}</p>
+          <p>
+            {current.address}, {current.locality}
+          </p>
+          <p>
+            {current.city}, {current.state} {current.pincode}
+          </p>
           <p className="text-gray-600 text-sm">Phone: {current.phone}</p>
-          <p className="text-sm text-yellow-700 bg-yellow-100 p-2 rounded">
-            ⚠ <strong>Test Mode:</strong> To simulate payment, use <strong>UPI</strong> with <code>success@razorpay</code>.
+          <p className="flex text-sm text-yellow-700 bg-yellow-100 p-2 rounded">
+            <FaExclamationTriangle className="mt-1" />{" "}
+            <strong>Test Mode:</strong> To simulate payment, use{" "}
+            <strong>UPI</strong> with <code>success@razorpay</code>.
           </p>
 
           <button
@@ -166,19 +164,22 @@ export default function AddressPage() {
           </button>
 
           <button
-            className="mt-2 w-full border border-indigo-600 text-indigo-600 py-2 rounded"
+            className="mt-2 w-full border border-black text-black py-2 rounded"
             onClick={() => setShowSheet(true)}
           >
             Change Address
           </button>
         </div>
       ) : (
+        <div className="border rounded-lg p-4 space-y-1">
+        <p className="font-gothic text-lg">You don't have any address yet. Click below to add one.</p>
         <button
-          className="w-full bg-indigo-600 text-white py-3 rounded"
-          onClick={() => navigate("/account/addresses/new")}
+          className="w-full font-gothic bg-orange-200 text-orange-600 py-3 rounded"
+          onClick={() => navigate("/address")}
         >
           + Add Address
         </button>
+        </div>
       )}
 
       {showSheet && (
@@ -191,7 +192,7 @@ export default function AddressPage() {
           }}
           onAdd={() => {
             setShowSheet(false);
-            navigate("/account/addresses/new");
+            navigate("/address");
           }}
           onClose={() => setShowSheet(false)}
         />
@@ -200,7 +201,6 @@ export default function AddressPage() {
   );
 }
 
-/* ───────── Slide-in Address Sheet ───────── */
 function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -212,9 +212,9 @@ function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }) {
     <div className="fixed inset-0 z-50 flex">
       <div className="fixed inset-0 bg-black/30 z-[75]" onClick={onClose} />
       <div
-        className={`fixed top-0 right-0 z-[80] h-screen w-4/5 max-w-[320px] bg-white shadow-xl
-                    transform transition-transform duration-300 ease-in-out
-                    ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 z-[80] h-screen w-4/5 max-w-[320px] bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
       >
         <button className="absolute top-3 right-3" onClick={onClose}>
           <IoClose size={24} />
@@ -224,8 +224,7 @@ function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }) {
           {addresses.map((addr) => (
             <label
               key={addr._id}
-              className={`flex items-start gap-3 border p-3 rounded cursor-pointer hover:shadow
-                          ${addr._id === selectedId ? "ring-2 ring-orange-600" : ""}`}
+              className={`flex items-start gap-3 border p-3 rounded cursor-pointer hover:shadow${addr._id === selectedId ? "ring-2 ring-orange-600": ""}`}
             >
               <input
                 type="radio"
@@ -237,23 +236,31 @@ function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }) {
               />
               <div>
                 <p className="font-medium">{addr.name}</p>
-                <p className="text-sm">{addr.address}, {addr.locality}</p>
-                <p className="text-sm">{addr.city}, {addr.state} {addr.pincode}</p>
+                <p className="text-sm">
+                  {addr.address}, {addr.locality}
+                </p>
+                <p className="text-sm">
+                  {addr.city}, {addr.state} {addr.pincode}
+                </p>
                 <p className="text-xs text-gray-500">Phone: {addr.phone}</p>
               </div>
             </label>
           ))}
         </form>
-        <button
-          className="w-full bg-indigo-600 text-white py-3 rounded-b"
-          onClick={() => {
-            onClose();
-            onAdd();
-          }}
-        >
-          + Add Address
-        </button>
+       <div className="flex justify-center mb-4">
+    <button
+      className="w-[90%] font-gothic bg-orange-200 text-orange-600 py-2 rounded-md text-xl"
+      onClick={() => {
+        onClose();
+        onAdd();
+      }}
+    >
+      + Add Address
+    </button>
+  </div>
       </div>
     </div>
   );
 }
+
+export default AddressPage;

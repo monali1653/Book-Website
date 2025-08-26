@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
 import api from "../api/axiosInstance";
+import Loader from "../components/Loader";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -12,8 +13,8 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     try {
       const [orderRes, ratingRes] = await Promise.all([
-        api.get(`/api/v1/users/my-orders`),
-        api.get(`/api/v1/rating/my-rating`),
+        api.get("/api/v1/users/my-orders"),
+        api.get("/api/v1/rating/my-rating"),
       ]);
       setOrders(orderRes.data.data.orders);
 
@@ -36,7 +37,7 @@ const MyOrders = () => {
       <h2 className="text-4xl font-bold mb-6">My Orders</h2>
 
       {loading ? (
-        <p className="text-gray-600">Loading orders...</p>
+        <Loader />
       ) : orders.length === 0 ? (
         <p className="text-gray-600">No orders yet.</p>
       ) : (
@@ -44,64 +45,35 @@ const MyOrders = () => {
           {orders.map((order) => (
             <div
               key={order._id}
-              className={`p-4 rounded shadow ${
-                order.status === "cancelled"
+              className={`relative p-4 rounded shadow ${
+                order.status === "Order Cancelled"
                   ? "bg-red-50 border border-red-300 cursor-default"
-                  : "bg-white hover:shadow-lg cursor-pointer"
+                  : "bg-white border border-gray-200 hover:shadow-lg cursor-pointer"
               }`}
               onClick={() => {
-                if (order.status !== "cancelled") {
+                if (order.status !== "Order Cancelled") {
                   navigate(`/myprofile/orders/${order._id}`);
                 }
               }}
             >
-              {/* Books List (vertical) */}
+              {order.status !== "Order Cancelled" && (<FaArrowRight className="absolute top-2 right-2 text-gray-400" />)}
+
               <div className="space-y-4">
                 {order.items.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4">
-                    {/* Book image */}
                     <img
                       src={item.book.bookImage}
                       alt={item.book.title}
                       className="w-24 h-32 object-cover rounded"
                     />
-
-                    {/* Book info */}
                     <div className="flex-1">
-                      {/* Book name */}
                       <p className="text-lg">{item.book.bookname}</p>
-
-                      {/* Order status */}
-                      {idx === 0 && (
-                        <p className="mt-1 text-sm font-medium">
-                          Status:{" "}
-                          <span
-                            className={`${
-                              order.status === "delivered"
-                                ? "text-green-600"
-                                : order.status === "shipped"
-                                ? "text-blue-600"
-                                : order.status === "processing"
-                                ? "text-yellow-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {order.status}
-                          </span>
-                        </p>
-                      )}
-
-                      {/* Cancelled Order Message */}
-                      {idx === 0 && order.status === "cancelled" && (
-                        <p className="text-red-600 font-semibold mt-2">
-                          Cancelled on:{" "}
-                          {new Date(order.updatedAt).toLocaleString()}
-                        </p>
-                      )}
+                      <p className="text-sm text-gray-600">
+                        By: {item.book.author}
+                      </p>
                     </div>
 
-                    {/* Rating Section (only for delivered orders) */}
-                    {order.status === "delivered" && (
+                    {order.status === "Order Delivered" && (
                       <div
                         className="flex flex-col items-end"
                         onClick={(e) => e.stopPropagation()}
@@ -124,7 +96,7 @@ const MyOrders = () => {
                                 onClick={() => {
                                   const newRating = i + 1;
                                   api
-                                    .post(`/api/v1/rating/add`, {
+                                    .post("/api/v1/rating/add", {
                                       bookId: item.book._id,
                                       rating: newRating,
                                     })
@@ -142,11 +114,29 @@ const MyOrders = () => {
                             );
                           })}
                         </div>
-                        <FaArrowRight className="mt-2 text-gray-400" />
                       </div>
                     )}
                   </div>
                 ))}
+
+                <div className="mt-2">
+                  <p className="text-sm font-medium">
+                    Status:{" "}
+                    <span
+                      className={`${
+                        order.status === "Order Delivered"
+                          ? "text-green-600"
+                          : order.status === "Order Shipped"
+                          ? "text-blue-600"
+                          : order.status === "Order Processing"
+                          ? "text-yellow-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
           ))}

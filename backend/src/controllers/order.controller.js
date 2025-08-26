@@ -6,9 +6,6 @@ import { Order } from "../models/order.model.js";
 import { Book } from "../models/book.model.js";
 import mongoose from "mongoose";
 
-/* =====================================================
-   📌 PLACE ORDER
-===================================================== */
 const placeOrder = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { bookId, quantity = 1, items = [] } = req.body;
@@ -24,13 +21,13 @@ const placeOrder = asyncHandler(async (req, res) => {
     const itemsToOrder = [];
     let totalAmount = 0;
 
-    /* 1️⃣ BUY NOW */
     if (bookId) {
       const book = await Book.findById(bookId).session(session);
       if (!book) throw new ApiError(404, "Book not found");
-      if (book.count < quantity)
-        throw new ApiError(400, `Only ${book.count} copies available.`);
-
+      if (book.count < quantity) {
+        throw new ApiError(400, `Only ${book.count} copies available`);
+      }
+        
       book.count -= quantity;
       book.buyers.push(userId);
       await book.save({ session });
@@ -39,16 +36,11 @@ const placeOrder = asyncHandler(async (req, res) => {
       totalAmount += book.price * quantity;
     }
 
-    /* 2️⃣ CART ITEMS */
     if (items.length) {
       for (const { bookId: id, quantity: qty = 1 } of items) {
         const book = await Book.findById(id).session(session);
-        if (!book) throw new ApiError(404, `Book with id ${id} not found.`);
-        if (book.count < qty)
-          throw new ApiError(
-            400,
-            `Only ${book.count} copies of “${book.bookname}” left.`
-          );
+        if (!book) throw new ApiError(404, `Book with id ${id} not found`);
+        if (book.count < qty) throw new ApiError(400,`Only ${book.count} copies of “${book.bookname}” left`);
 
         book.count -= qty;
         book.buyers.push(userId);
@@ -58,24 +50,22 @@ const placeOrder = asyncHandler(async (req, res) => {
         totalAmount += book.price * qty;
       }
 
-      // remove ordered items from cart
       const user = await User.findById(userId).session(session);
-      const orderedIds = items.map(i => i.bookId.toString());
+      const orderedIds = items.map((i) => i.bookId.toString());
       user.cart = user.cart.filter(
-        c => !orderedIds.includes((c.book._id || c.book).toString())
+        (c) => !orderedIds.includes((c.book._id || c.book).toString())
       );
       user.markModified("cart");
       await user.save({ session });
     }
 
-    /* 3️⃣ CREATE ORDER */
     const [order] = await Order.create(
       [
         {
           user: userId,
           items: itemsToOrder,
           totalAmount,
-          returnTill: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          returnTill: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         },
       ],
       { session }
@@ -84,13 +74,12 @@ const placeOrder = asyncHandler(async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    /* DEMO STATUS SIMULATION */
     setTimeout(async () => {
       try {
         const current = await Order.findById(order._id);
-        if (current && current.status === "placed") {
+        if (current && current.status === "Order Placed") {
           await Order.findByIdAndUpdate(order._id, {
-            status: "shipped",
+            status: "Order Shipped",
             shippedAt: new Date(),
           });
         }
@@ -102,9 +91,9 @@ const placeOrder = asyncHandler(async (req, res) => {
     setTimeout(async () => {
       try {
         const current = await Order.findById(order._id);
-        if (current && current.status === "shipped") {
+        if (current && current.status === "Order Shipped") {
           await Order.findByIdAndUpdate(order._id, {
-            status: "delivered",
+            status: "Order Delivered",
             deliveredAt: new Date(),
           });
         }
@@ -113,9 +102,7 @@ const placeOrder = asyncHandler(async (req, res) => {
       }
     }, 80_000);
 
-    return res
-      .status(201)
-      .json(new ApiResponse(201, { order }, "Order placed successfully"));
+    return res.status(201).json(new ApiResponse(201, { order }, "Order placed successfully"));
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
@@ -123,25 +110,36 @@ const placeOrder = asyncHandler(async (req, res) => {
   }
 });
 
-/* =====================================================
-   📌 GET USER ORDERS
-===================================================== */
 const getMyOrders = asyncHandler(async (req, res) => {
   const userId = new mongoose.Types.ObjectId(req.user._id);
 
   const orders = await Order.aggregate([
-    { $match: { user: userId } },
-    { $sort: { createdAt: -1 } },
-    { $unwind: "$items" },
+    { 
+      $match: 
+      { 
+        user: userId 
+      } 
+    },
+    { 
+      $sort: 
+      { 
+        createdAt: -1 
+      } 
+    },
+    { 
+      $unwind: "$items" 
+    },
     {
       $lookup: {
         from: "books",
         localField: "items.book",
         foreignField: "_id",
-        as: "items.book",
+        as: "items_book",
       },
     },
-    { $unwind: "$items.book" },
+    { 
+      $unwind: "$items_book" 
+    },
     {
       $group: {
         _id: "$_id",
@@ -157,36 +155,34 @@ const getMyOrders = asyncHandler(async (req, res) => {
         createdAt: { $first: "$createdAt" },
         items: {
           $push: {
-            book: "$items.book",
+            book: "$items_book",
             quantity: "$items.quantity",
           },
         },
       },
     },
-    { $sort: { placedAt: -1, _id: -1 } },
+    { 
+      $sort: { 
+        placedAt: -1, 
+        _id: -1 
+      } 
+    },
   ]);
 
-  res
-    .status(200)
-    .json(new ApiResponse(200, { orders }, "Your orders fetched successfully"));
+  res.status(200).json(new ApiResponse(200, { orders }, "Your orders fetched successfully"));
 });
 
-/* =====================================================
-   📌 CANCEL ORDER
-===================================================== */
 const cancelOrder = asyncHandler(async (req, res) => {
   const orderId = req.params.id;
   const userId = req.user._id;
 
-  const order = await Order.findOne({ _id: orderId, user: userId }).populate(
-    "items.book"
-  );
+  const order = await Order.findOne({ _id: orderId, user: userId }).populate("items.book");
   if (!order) throw new ApiError(404, "Order not found");
 
-  if (order.status === "shipped" || order.status === "delivered") {
-    throw new ApiError(400, "Cannot cancel order after it is shipped or delivered");
+  if (order.status === "Order Shipped" || order.status === "Order Delivered") {
+    throw new ApiError(400,"Cannot cancel order after it is shipped or delivered");
   }
-  if (order.status === "cancelled") {
+  if (order.status === "Order Cancelled") {
     throw new ApiError(400, "Order is already cancelled");
   }
 
@@ -194,7 +190,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
   session.startTransaction();
 
   try {
-    order.status = "cancelled";
+    order.status = "Order Cancelled";
     await order.save({ session });
 
     for (const item of order.items) {
@@ -202,7 +198,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
       if (book) {
         book.count += item.quantity;
         book.buyers = book.buyers.filter(
-          buyerId => buyerId.toString() !== userId.toString()
+          (buyerId) => buyerId.toString() !== userId.toString()
         );
         await book.save({ session });
       }
@@ -211,9 +207,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    res
-      .status(200)
-      .json(new ApiResponse(200, { order }, "Order cancelled successfully"));
+    res.status(200).json(new ApiResponse(200, { order }, "Order cancelled successfully"));
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
@@ -221,10 +215,6 @@ const cancelOrder = asyncHandler(async (req, res) => {
   }
 });
 
-/* =====================================================
-   📌 RETURN ORDER (multi-step)
-===================================================== */
-// controllers/orderController.js
 const returnOrder = asyncHandler(async (req, res) => {
   const orderId = req.params.id;
   const userId = req.user._id;
@@ -232,7 +222,7 @@ const returnOrder = asyncHandler(async (req, res) => {
   const order = await Order.findOne({ _id: orderId, user: userId }).populate("items.book");
   if (!order) throw new ApiError(404, "Order not found");
 
-  if (order.status !== "delivered") {
+  if (order.status !== "Order Delivered") {
     throw new ApiError(400, "Only delivered orders can be returned");
   }
 
@@ -240,25 +230,25 @@ const returnOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Return period has expired");
   }
 
-  // 1️⃣ Immediately mark return initiated
   order.status = "Return Initiated";
   order.returnInitiatedAt = new Date();
   await order.save();
 
-  // 2️⃣ After 20 sec → Product Received + Increase book count
   setTimeout(async () => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const orderToUpdate = await Order.findById(orderId).populate("items.book").session(session);
+      const orderToUpdate = await Order.findById(orderId)
+        .populate("items.book")
+        .session(session);
 
-      if (!orderToUpdate) throw new Error("Order not found during product_received update");
+      if (!orderToUpdate)
+        throw new Error("Order not found during product_received update");
 
       orderToUpdate.status = "Product Received";
       orderToUpdate.productReceivedAt = new Date();
       await orderToUpdate.save({ session });
 
-      // Restore book counts
       for (const item of orderToUpdate.items) {
         const book = await Book.findById(item.book._id).session(session);
         if (book) {
@@ -272,11 +262,10 @@ const returnOrder = asyncHandler(async (req, res) => {
     } catch (err) {
       await session.abortTransaction();
       session.endSession();
-      console.error("Error during product_received update:", err);
+      console.error("Error during product received update:", err);
     }
   }, 20000);
 
-  // 3️⃣ After 40 sec → Refund Completed
   setTimeout(async () => {
     try {
       await Order.findByIdAndUpdate(orderId, {
@@ -288,10 +277,7 @@ const returnOrder = asyncHandler(async (req, res) => {
     }
   }, 40000);
 
-  res.status(200).json(
-    new ApiResponse(200, { order }, "Return process initiated")
-  );
+  res.status(200).json(new ApiResponse(200, { order }, "Return process initiated"));
 });
-
 
 export { placeOrder, getMyOrders, cancelOrder, returnOrder };
