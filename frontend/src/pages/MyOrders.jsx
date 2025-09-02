@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaStar } from "react-icons/fa";
 import api from "../api/axiosInstance";
 import Loader from "../components/Loader";
 
@@ -109,7 +109,7 @@ const MyOrders = () => {
                                     .catch(console.error);
                                 }}
                               >
-                                ★
+                                <FaStar/>
                               </span>
                             );
                           })}
@@ -128,8 +128,14 @@ const MyOrders = () => {
                           ? "text-green-600"
                           : order.status === "Order Shipped"
                           ? "text-blue-600"
-                          : order.status === "Order Processing"
-                          ? "text-yellow-600"
+                          : order.status === "Order Placed"
+                          ? "text-yellow-400"
+                          : order.status === "Return Initiated"
+                          ? "text-amber-500"
+                          : order.status === "Product Received"
+                          ? "text-blue-500"
+                          : order.status === "Refund Completed"
+                          ? "text-green-600"
                           : "text-red-600"
                       }`}
                     >

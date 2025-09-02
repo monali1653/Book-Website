@@ -20,8 +20,8 @@ const OrderDetails = () => {
 
   const fetchOrder = async () => {
     try {
-      const { data } = await api.get(`/api/v1/users/my-orders`);
-      const orders = data.data.orders;
+      const res = await api.get(`/api/v1/users/my-orders`);
+      const orders = res.data.data.orders;
       const foundOrder = orders.find((o) => o._id === id);
       setOrder(foundOrder);
     } catch (error) {
@@ -33,14 +33,7 @@ const OrderDetails = () => {
     fetchOrder();
   }, [id]);
 
-  useEffect(() => {
-    if (!order) return;
-    let intervalId;
-    if (order.returnInitiatedAt && !order.refundCompletedAt) {
-      intervalId = setInterval(fetchOrder, 10000); // 10s
-    }
-    return () => clearInterval(intervalId);
-  }, [order]);
+
 
   const handleCancelOrder = async () => {
     try {
@@ -173,7 +166,7 @@ const OrderDetails = () => {
         </div>
 
         <div className="mt-6 flex gap-4">
-          {(order.status === "Order Placed" || order.status === "Order Shipped") && (
+          {(order.status === "Order Placed" && !order.shippedAt) && (
             <button
               onClick={() =>
                 setModalData({

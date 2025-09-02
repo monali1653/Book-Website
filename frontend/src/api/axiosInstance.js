@@ -23,6 +23,9 @@ api.interceptors.response.use(
   res => res,
   async err => {
     const originalRequest = err.config;
+    if (originalRequest.url.includes("/login") || originalRequest.url.includes("/signup")) {
+      return Promise.reject(err);
+    }
 
     if (err.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {

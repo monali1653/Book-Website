@@ -5,23 +5,7 @@ import api from "../api/axiosInstance.js";
 import Loader from "../components/Loader.jsx";
 
 const categories = [
-  {
-    label: "Best Seller",
-    icon: "/images/best-seller.png",
-    path: "best-seller",
-  },
-  {
-    label: "Award Winners",
-    icon: "/images/award-winner.png",
-    path: "award-winners",
-  },
-  { label: "Box Sets", icon: "/images/box-set.png", path: "box-sets" },
-  {
-    label: "International Best Seller",
-    icon: "/images/int-best.png",
-    path: "international",
-  },
-  { label: "New Arrivals", icon: "/images/new-arr.png", path: "new-arrivals" },
+  
   { label: "Fictions Books", icon: "/images/fict.png", path: "fiction" },
   { label: "Children Books", icon: "/images/child.png", path: "children" },
   { label: "Comic Books", icon: "/images/comic.png", path: "comics" },

@@ -18,7 +18,7 @@ const placeOrder = asyncHandler(async (req, res) => {
   session.startTransaction();
 
   try {
-    const itemsToOrder = [];
+    const itemsToOrder = []; 
     let totalAmount = 0;
 
     if (bookId) {

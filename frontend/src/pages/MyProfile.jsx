@@ -14,17 +14,13 @@ import Loader from "../components/Loader.jsx";
 
 const MyProfile = () => {
   const navigate = useNavigate();
-  const [addresses, setAddresses] = useState([]);
   const [user, setUser] = useState(null);
-  const [editUser, setEditUser] = useState(null);
-
+  
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await api.get(`/api/v1/users/myprofile`);
         setUser(res.data.data);
-        setEditUser(res.data.data);
-        setAddresses(res.data.data.addresses || []);
       } catch (err) {
         console.error("Failed to fetch user", err);
       }
@@ -87,7 +83,7 @@ const MyProfile = () => {
             </button>
           </div>
 
-          {/* Second Row */}
+          
           <div className="flex gap-4">
             <button
               onClick={() => navigate("/myprofile/wishlist")}
